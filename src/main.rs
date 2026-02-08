@@ -10,8 +10,8 @@ use std::sync::atomic::{fence, Ordering};
 #[derive(Debug, Clone, Copy)]
 struct Data {
     id: u64, 
+    size: u64,  
     price: i32, 
-    size: i32,  
     side: i8,   
     action: i8, 
     _pad1: [u8; 2],
@@ -98,7 +98,7 @@ async fn main()
             };
             for item in orders_to_process 
             {
-                if let Some(inner_data) = arr[1].as_array() 
+                if let Some(inner_data) = item.as_array() 
                 {
                     if inner_data.len() >= 3 
                     {
@@ -113,7 +113,7 @@ async fn main()
                         {
                             id: order_id,
                             price: (price_f * 100.0) as i32,
-                            size: (amount_f.abs() * 1_000_000.0) as i32,
+                            size: (amount_f.abs() * 1_000_000.0) as u64,
                             side,
                             action: if is_cancel { 1 } else { 0 },
                             _pad1: [0,0],
