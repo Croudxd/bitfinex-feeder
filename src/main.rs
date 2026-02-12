@@ -117,10 +117,8 @@ async fn main()
             let payload = if arr[1].is_string() 
             {
                 let msg_type = arr[1].as_str().unwrap_or("");
-                    if msg_type == "hb" { continue; } // Skip Heartbeats
-                    
-                    // Trade Executions ("te") or Updates ("tu"). 
-                    // Data is at arr[2]
+                    if msg_type == "hb" { continue; } 
+                    if msg_type == "tu" { continue; }
                     if arr.len() < 3 { continue; }
                     is_trade_msg = true;
                     &arr[2]
@@ -151,14 +149,14 @@ async fn main()
                     {
                         let order_id = inner_data[0].as_u64().unwrap_or(0);
                                 
-                                let (price_f, amount_f) = if is_trade_msg || incoming_chan_id == trade_channel_id 
-                                {
-                                     (inner_data[3].as_f64().unwrap_or(0.0), inner_data[2].as_f64().unwrap_or(0.0))
-                                }
-                                else 
-                                {
-                                     (inner_data[1].as_f64().unwrap_or(0.0), inner_data[2].as_f64().unwrap_or(0.0))
-                                };
+                        let (price_f, amount_f) = if is_trade_msg || incoming_chan_id == trade_channel_id 
+                        {
+                             (inner_data[3].as_f64().unwrap_or(0.0), inner_data[2].as_f64().unwrap_or(0.0))
+                        }
+                        else 
+                        {
+                             (inner_data[1].as_f64().unwrap_or(0.0), inner_data[2].as_f64().unwrap_or(0.0))
+                        };
 
                         let is_cancel = price_f == 0.0;
                         let side = if amount_f > 0.0 { 0 } else { 1 };
@@ -172,7 +170,6 @@ async fn main()
                             status: if incoming_chan_id == trade_channel_id { 1 } else { 0 },
                             _pad1: [0], 
                         };
-
                         ring_buffer(packet, shm);
                     }
                 }
