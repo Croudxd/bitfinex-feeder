@@ -43,11 +43,9 @@ async fn main()
     let mut mmap = unsafe { MmapMut::map_mut(&file).expect("Failed to map") };
     let shm = unsafe { &mut *(mmap.as_mut_ptr() as *mut Shared_memory_layout) };
 
-    println!("Shared u64 Ready at /dev/shm/single_u64_shm");
     let url = "wss://api-pub.bitfinex.com/ws/2";
 
     let (ws_stream, _) = connect_async(url).await.expect("Failed to connect");
-    println!("Connected!");
 
     let (mut write, mut read) = ws_stream.split();
 
@@ -77,12 +75,10 @@ async fn main()
                     if channel == "book" 
                     {
                         book_channel_id = chan_id;
-                        println!("-> Book Channel Locked: {}", book_channel_id);
                     }
                     else if channel == "trades" 
                     {
                         trade_channel_id = chan_id;
-                        println!("-> Trade Channel Locked: {}", trade_channel_id);
                     }
                 }
             }
