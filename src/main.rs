@@ -11,7 +11,7 @@ use std::sync::atomic::{fence, Ordering};
 struct Data {
     id: u64, 
     size: u64,  
-    price: i32, 
+    price: i64, 
     side: i8,   
     action: i8, 
     status: i8,
@@ -51,10 +51,10 @@ async fn main()
 
     let (mut write, mut read) = ws_stream.split();
 
-    let book_json = r#"{ "event": "subscribe", "channel": "book", "pair": "tETHUSD", "prec": "R0" }"#;
+    let book_json = r#"{ "event": "subscribe", "channel": "book", "pair": "tBTCUSD", "prec": "R0" }"#;
     write.send(Message::Text(book_json.into())).await.ok();
 
-    let trade_json = r#"{ "event": "subscribe", "channel": "trades", "pair": "tETHUSD", "prec": "R0" }"#;
+    let trade_json = r#"{ "event": "subscribe", "channel": "trades", "pair": "tBTCUSD", "prec": "R0" }"#;
     write.send(Message::Text(trade_json.into())).await.ok();
 
     let mut book_channel_id: u64 = 0;
@@ -164,7 +164,7 @@ async fn main()
                         let packet = Data {
                             id: order_id,
                             size: (amount_f.abs() * 1_000_000.0) as u64,
-                            price: (price_f * 100.0) as i32,
+                            price: (price_f * 100.0) as i64,
                             side,
                             action: if is_cancel { 1 } else { 0 },
                             status: if incoming_chan_id == trade_channel_id { 1 } else { 0 },
