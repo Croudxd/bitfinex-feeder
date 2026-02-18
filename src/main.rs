@@ -5,6 +5,7 @@ use memmap2::MmapMut;
 use std::ptr;
 use std::thread;
 use std::sync::atomic::{fence, Ordering};
+// use std::time::{SystemTime, UNIX_EPOCH};
   
 #[repr(C)] 
 #[derive(Debug, Clone, Copy)]
@@ -144,21 +145,30 @@ async fn main()
                     if inner_data.len() >= 3 
                     {
                         let order_id = inner_data[0].as_u64().unwrap_or(0);
+
+                        // let mut timestamp_ms: u64 = 0;
                                 
                         let (price_f, amount_f) = if is_trade_msg || incoming_chan_id == trade_channel_id 
                         {
+                             // timestamp_ms = inner_data[1].as_u64().unwrap_or(0);
                              (inner_data[3].as_f64().unwrap_or(0.0), inner_data[2].as_f64().unwrap_or(0.0))
                         }
                         else 
                         {
-                             (inner_data[1].as_f64().unwrap_or(0.0), inner_data[2].as_f64().unwrap_or(0.0))
+                            // timestamp_ms = SystemTime::now()
+                            //         .duration_since(UNIX_EPOCH)
+                            //         .unwrap()
+                            //         .as_millis() as u64;
+                            //
+                            (inner_data[0].as_f64().unwrap_or(0.0), inner_data[2].as_f64().unwrap_or(0.0))
                         };
 
-                        let is_cancel = price_f == 0.0;
+                        let is_cancel = price_f == 0.0 || (!is_trade_msg && inner_data[1].as_f64().unwrap_or(0.0) == 0.0);
                         let side = if amount_f > 0.0 { 0 } else { 1 };
 
                         let packet = Data {
                             id: order_id,
+                            // time: timestamp_ms,
                             size: (amount_f.abs() * 1_000_000.0) as u64,
                             price: (price_f * 100.0) as i64,
                             side,
